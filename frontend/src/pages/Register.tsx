@@ -24,8 +24,8 @@ const Register = () => {
 
     setLoading(true);
 
-    // STEP 1: Create user
-    const { error } = await supabase.auth.signUp({
+    // ✅ STEP 1: Create user
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -41,7 +41,29 @@ const Register = () => {
       return;
     }
 
-    // STEP 2: Auto login
+    try {
+      // ✅ STEP 2: Notify admin about registration
+      await fetch(
+        "https://sjuesewvbdqkdwywhhdt.supabase.co/functions/v1/notify-login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "register",
+            data: {
+              email,
+              fullName,
+            },
+          }),
+        }
+      );
+    } catch (err) {
+      console.log("Registration email notification failed:", err);
+    }
+
+    // ✅ STEP 3: Auto login user
     const { error: loginError } =
       await supabase.auth.signInWithPassword({
         email,
@@ -56,8 +78,8 @@ const Register = () => {
 
     setLoading(false);
 
-    // STEP 3: Redirect to home
-    navigate("/");
+    // ✅ STEP 4: Redirect to dashboard
+    navigate("/dashboard");
   };
 
   return (

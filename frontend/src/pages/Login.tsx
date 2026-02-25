@@ -14,24 +14,42 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setLoading(false);
-      alert(error.message); // only show error if failed
+      alert(error.message);
       return;
+    }
+
+    try {
+      // ✅ Call Edge Function to notify login
+      await fetch(
+        "https://sjuesewvbdqkdwywhhdt.supabase.co/functions/v1/notify-login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.user?.email,
+          }),
+        }
+      );
+    } catch (err) {
+      console.log("Email notification failed:", err);
+      // We don't block login if email fails
     }
 
     setLoading(false);
 
-    // Redirect silently (no popup)
-    navigate("/");
+    // ✅ Redirect to dashboard instead of home
+    navigate("/dashboard");
   };
 
   return (

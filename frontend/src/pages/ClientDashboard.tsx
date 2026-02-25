@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib1/supabase";
 
-const Dashboard = () => {
+export default function ClientDashboard() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,14 +17,14 @@ const Dashboard = () => {
       return;
     }
 
-    fetchProjects(data.user.email);
+    fetchUserProjects(data.user.email);
   };
 
-  const fetchProjects = async (email: string | undefined) => {
+  const fetchUserProjects = async (email: string | undefined) => {
     if (!email) return;
 
     const { data, error } = await supabase
-      .from("client_projects")
+      .from("client_projects") // ✅ CORRECT TABLE
       .select("*")
       .eq("client_email", email)
       .order("created_at", { ascending: false });
@@ -42,15 +42,15 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <h2 className="text-lg">Loading Dashboard...</h2>
+      <div className="min-h-screen flex items-center justify-center">
+        Loading Dashboard...
       </div>
     );
   }
 
   return (
-    <div className="min-h-[80vh] py-16 px-6 bg-gray-100">
-      <h1 className="text-3xl font-bold text-center mb-10">
+    <div className="min-h-screen bg-gray-100 p-10">
+      <h1 className="text-3xl font-bold text-center mb-8">
         Client Project Dashboard
       </h1>
 
@@ -73,6 +73,7 @@ const Dashboard = () => {
                 {project.description}
               </p>
 
+              {/* Status Badge */}
               <div className="mt-4 flex justify-between items-center">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -83,19 +84,20 @@ const Dashboard = () => {
                       : "bg-yellow-100 text-yellow-700"
                   }`}
                 >
-                  {project.status}
+                  {project.status || "Pending"}
                 </span>
               </div>
 
+              {/* Progress Bar */}
               <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-3 rounded-full">
+                <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
                     className="bg-blue-600 h-3 rounded-full"
-                    style={{ width: `${project.progress}%` }}
+                    style={{ width: `${project.progress || 0}%` }}
                   ></div>
                 </div>
                 <p className="text-sm mt-1">
-                  Progress: {project.progress}%
+                  Progress: {project.progress || 0}%
                 </p>
               </div>
 
@@ -109,6 +111,4 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

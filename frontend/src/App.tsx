@@ -1,3 +1,5 @@
+import AdminSubmissions from "./pages/AdminSubmissions";
+import ClientDashboard from "./pages/ClientDashboard";
 import ScrollToTop from "./ScrollToTop";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -37,6 +39,8 @@ const App = () => (
 
           <Layout>
             <Routes>
+             <Route path="/admin/submissions" element={<AdminSubmissions />} />
+             <Route path="/dashboard" element={<ClientDashboard />} />
               <Route path="/" element={<Index />} />
               <Route path="/services" element={<Services />} />
               <Route path="/about" element={<About />} />
