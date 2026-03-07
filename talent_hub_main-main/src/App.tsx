@@ -1,13 +1,19 @@
 import AdminSubmissions from "./pages/AdminSubmissions";
 import ClientDashboard from "./pages/ClientDashboard";
 import ScrollToTop from "./ScrollToTop";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { ThemeProvider } from "next-themes";
+
 import Layout from "@/components/layout/Layout";
+
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import About from "./pages/About";
@@ -28,60 +34,105 @@ import SEO from "@/components/SEO";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
-    <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+function App() {
+  return (
+    <HelmetProvider>
+      <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false}>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
 
-          <BrowserRouter>
-            {/* ✅ Scroll Fix Added Here */}
-            <ScrollToTop />
+            <Toaster />
+            <Sonner />
 
-            <Layout>
-              <Routes>
-                <Route path="/admin/submissions" element={<AdminSubmissions />} />
-                <Route path="/dashboard" element={<ClientDashboard />} />
-                <Route path="/" element={
-                  <SEO title="Home" description="Premium Managed Freelance Agency">
-                    <Index />
-                  </SEO>
-                } />
-                <Route path="/services" element={
-                  <SEO title="Our Services" description="Explore the wide range of freelance services offered by RAWGENN." url="https://rawgenn.com/services">
-                    <Services />
-                  </SEO>
-                } />
-                <Route path="/about" element={
-                  <SEO title="About Us" description="Learn more about the team and mission behind RAWGENN." url="https://rawgenn.com/about">
-                    <About />
-                  </SEO>
-                } />
-                <Route path="/why-rawgenn" element={<WhyRawgenn />} />
-                <Route path="/reviews" element={<Reviews />} />
-                <Route path="/contact" element={
-                  <SEO title="Contact Us" description="Get in touch with RAWGENN to start your project.">
-                    <Contact />
-                  </SEO>
-                } />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/portfolios" element={<Portfolios />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/post-project" element={<PostProject />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
+            <BrowserRouter>
 
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </HelmetProvider>
-);
+              <ScrollToTop />
+
+              <Layout>
+
+                <Routes>
+
+                  <Route path="/admin/submissions" element={<AdminSubmissions />} />
+
+                  <Route path="/dashboard" element={<ClientDashboard />} />
+
+                  <Route
+                    path="/"
+                    element={
+                      <SEO
+                        title="RAWGENN | Premium Managed Freelance Agency"
+                        description="RAWGENN connects businesses with elite freelancers."
+                      >
+                        <Index />
+                      </SEO>
+                    }
+                  />
+
+                  <Route
+                    path="/services"
+                    element={
+                      <SEO
+                        title="Services | RAWGENN"
+                        description="Explore the freelance services offered by RAWGENN."
+                      >
+                        <Services />
+                      </SEO>
+                    }
+                  />
+
+                  <Route
+                    path="/about"
+                    element={
+                      <SEO
+                        title="About | RAWGENN"
+                        description="Learn more about RAWGENN and our mission."
+                      >
+                        <About />
+                      </SEO>
+                    }
+                  />
+
+                  <Route path="/why-rawgenn" element={<WhyRawgenn />} />
+
+                  <Route path="/reviews" element={<Reviews />} />
+
+                  <Route
+                    path="/contact"
+                    element={
+                      <SEO
+                        title="Contact | RAWGENN"
+                        description="Get in touch with RAWGENN to start your project."
+                      >
+                        <Contact />
+                      </SEO>
+                    }
+                  />
+
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+
+                  <Route path="/portfolios" element={<Portfolios />} />
+
+                  <Route path="/admin" element={<Admin />} />
+
+                  <Route path="/post-project" element={<PostProject />} />
+
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<Terms />} />
+
+                  <Route path="*" element={<NotFound />} />
+
+                </Routes>
+
+              </Layout>
+
+            </BrowserRouter>
+
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </HelmetProvider>
+  );
+}
 
 export default App;
