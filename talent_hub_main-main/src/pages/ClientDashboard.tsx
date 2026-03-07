@@ -103,7 +103,7 @@ export default function ClientDashboard() {
           </div>
           <div className="flex gap-3">
             <Button variant="outline" size="sm" asChild>
-              <a href="/post-project">New Request</a>
+              <a href="/post-project">Request Quote</a>
             </Button>
           </div>
         </div>
@@ -180,8 +180,8 @@ export default function ClientDashboard() {
                     <div className="text-center py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
                       <Briefcase className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                       <h4 className="text-gray-900 font-medium">No projects yet</h4>
-                      <p className="text-gray-500 text-sm mt-1 mb-4">You haven't requested any services.</p>
-                      <Button size="sm" asChild><a href="/post-project">Submit a Request</a></Button>
+                      <p className="text-gray-500 text-sm mt-1 mb-4">You haven't requested any quotes.</p>
+                      <Button size="sm" asChild><a href="/post-project">Request a Quote</a></Button>
                     </div>
                   ) : (
                     <div className="space-y-4">

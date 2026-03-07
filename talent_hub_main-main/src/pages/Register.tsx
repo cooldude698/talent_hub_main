@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/lib1/supabase";
+import { FcGoogle } from "react-icons/fc";
+import { Check, X } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -15,6 +17,21 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const calculatePasswordStrength = (pass: string) => {
+    let score = 0;
+    if (!pass) return { score: 0, label: "", color: "bg-gray-200" };
+    if (pass.length > 8) score += 1;
+    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) score += 1;
+    if (/\d/.test(pass)) score += 1;
+    if (/[^a-zA-Z\d]/.test(pass)) score += 1;
+
+    if (score < 2) return { score, label: "Weak", color: "bg-red-500", text: "text-red-500", feedback: "Add numbers and special characters" };
+    if (score < 4) return { score, label: "Medium", color: "bg-yellow-500", text: "text-yellow-600", feedback: "Add uppercase letters or special characters" };
+    return { score, label: "Strong", color: "bg-green-500", text: "text-green-600", feedback: "Great password!" };
+  };
+
+  const strength = calculatePasswordStrength(password);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +111,26 @@ const Register = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) {
+        setErrorMessage(error.message);
+      }
+    } catch (err) {
+      setErrorMessage("Something went wrong with Google Registration. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-[85vh] items-center justify-center py-12">
       <motion.div
@@ -108,6 +145,30 @@ const Register = () => {
           <p className="mt-2 text-sm text-muted-foreground">
             Join RAWGENN to access premium freelance services.
           </p>
+        </div>
+
+        <div className="mb-6 space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continue with Google
+          </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleRegister}>
@@ -147,6 +208,28 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {password && (
+              <div className="mt-2 text-xs">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-1 gap-1">
+                    {[1, 2, 3, 4].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1.5 flex-1 rounded-full ${
+                          strength.score >= level ? strength.color : "bg-gray-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className={`font-medium ${strength.text}`}>
+                    {strength.label}
+                  </span>
+                </div>
+                {strength.score < 4 && (
+                  <p className="text-muted-foreground">{strength.feedback}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "../lib1/supabase";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -74,6 +75,26 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) {
+        setErrorMessage(error.message);
+      }
+    } catch (err) {
+      setErrorMessage("Something went wrong with Google Login. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-[85vh] items-center justify-center py-12">
       <motion.div
@@ -88,6 +109,30 @@ const Login = () => {
           <p className="mt-2 text-sm text-muted-foreground">
             Log in to access your RAWGENN account
           </p>
+        </div>
+
+        <div className="mb-6 space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 bg-white hover:bg-gray-50 text-gray-700 border-gray-200"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continue with Google
+          </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleLogin}>

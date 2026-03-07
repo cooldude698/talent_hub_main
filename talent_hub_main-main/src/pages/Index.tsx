@@ -199,17 +199,43 @@ const Home = () => {
         </div>
       </section>
 
+    {/* Payment Policy */}
+      <section className="border-t border-border/50 py-24 bg-card/20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold mb-6">Transparent Payment Policy</h2>
+            <p className="text-muted-foreground mb-12">We believe in building client trust from day one with clear, milestone-based payments.</p>
+            
+            <div className="grid sm:grid-cols-2 gap-6">
+              <motion.div variants={item} className="glass-card-hover p-8 rounded-2xl border border-primary/20 bg-primary/5">
+                <h3 className="text-xl font-bold text-primary mb-3">Projects below ₹10,000</h3>
+                <div className="text-4xl font-display font-bold mb-4">100%</div>
+                <p className="text-sm font-medium">Advance Payment</p>
+                <p className="text-xs text-muted-foreground mt-2">To secure the engagement</p>
+              </motion.div>
+              
+              <motion.div variants={item} className="glass-card-hover p-8 rounded-2xl border border-primary/20 bg-primary/5">
+                <h3 className="text-xl font-bold text-primary mb-3">Projects above ₹10,000</h3>
+                <div className="text-4xl font-display font-bold mb-4">50%</div>
+                <p className="text-sm font-medium">Advance Payment</p>
+                <p className="text-xs text-muted-foreground mt-2">Remaining 50% after milestone completion</p>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="glass-card mx-auto max-w-3xl p-8 md:p-12 text-center">
             <h2 className="font-display text-2xl md:text-3xl font-bold">Ready to Start Your Project?</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm sm:text-base text-muted-foreground">
-              Submit your requirements and let us match you with the perfect freelancer for the job.
+              Submit your requirements and get a custom quote for your project.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="w-full sm:w-auto" asChild>
-                <Link to="/register">Get Started Free</Link>
+                <Link to="/post-project">Get a Quote</Link>
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
                 <Link to="/contact">Contact Us</Link>

@@ -61,17 +61,18 @@ const PostProject = () => {
     try {
       // First try to insert into the new `projects` table
       const { data, error } = await supabase
-        .from('projects')
-        .insert([
-          {
-            user_id: user.id,
-            project_name: values.projectName,
-            service_type: values.serviceType,
-            budget: values.budget ? Number(values.budget) : null,
-            status: 'Pending'
-          }
-        ])
-        .select();
+  .from("projects")
+  .insert([
+    {
+      user_id: user.id,
+      project_name: values.projectName,
+      service_type: values.serviceType,
+      description: values.description,
+      budget: values.budget ? Number(values.budget) : null,
+      status: "Pending"
+    }
+  ])
+  .select();
 
       if (error) {
         throw error;
@@ -108,9 +109,9 @@ const PostProject = () => {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
             <Lock className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="font-display text-3xl font-bold">Post a Project</h1>
+          <h1 className="font-display text-3xl font-bold">Get a Quote</h1>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Log in to submit your project requirements and get matched with a verified freelancer.
+            Log in to submit your project requirements and receive a custom quote.
           </p>
           <Button className="mt-6" asChild>
             <Link to="/login">Log In to Continue</Link>
@@ -126,8 +127,8 @@ const PostProject = () => {
       <div className="container mx-auto px-4 max-w-3xl">
         <SectionHeading
           badge="New Request"
-          title="Start a New Project"
-          description="Fill out the details below and we will match you with the perfect expert for the job."
+          title="Get a Custom Quote"
+          description="Fill out the details below and we will send you a custom quote for your project."
         />
 
         <motion.div
@@ -141,7 +142,7 @@ const PostProject = () => {
             </div>
             <div>
               <h2 className="text-xl font-display font-bold">Project Details</h2>
-              <p className="text-sm text-muted-foreground">Provide enough info so we can assign the best talent.</p>
+              <p className="text-sm text-muted-foreground">Provide enough info so we can generate an accurate quote.</p>
             </div>
           </div>
 
@@ -221,13 +222,18 @@ const PostProject = () => {
                 )}
               />
 
-              <div className="pt-4 flex justify-end">
-                <Button type="button" variant="outline" className="mr-3" onClick={() => navigate('/dashboard')} disabled={loading}>
-                  Cancel
-                </Button>
-                <Button type="submit" size="lg" disabled={loading} className="px-8 shadow-md">
-                  {loading ? "Submitting..." : "Submit Project"}
-                </Button>
+              <div className="pt-4 flex flex-col items-end gap-2">
+                <div className="flex justify-end w-full">
+                  <Button type="button" variant="outline" className="mr-3" onClick={() => navigate('/dashboard')} disabled={loading}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" size="lg" disabled={loading} className="px-8 shadow-md">
+                    {loading ? "Submitting..." : "Get Quote"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  * Note: Projects below ₹10,000 require 100% advance. Projects above require 50% advance.
+                </p>
               </div>
 
             </form>
