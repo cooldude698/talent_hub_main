@@ -18,28 +18,34 @@ interface Review {
 }
 
 const featuredReviews: Review[] = [
-  {
-    name: "Sarah Mitchell",
-    service: "Web Development",
-    rating: 5,
-    review:
-      "RAWGENN delivered a stunning website that exceeded expectations. Extremely professional process.",
-  },
-  {
-    name: "David Chen",
-    service: "Logo Design",
-    rating: 5,
-    review:
-      "Outstanding creative quality and very smooth communication. Highly recommended.",
-  },
-  {
-    name: "Maria Santos",
-    service: "UI/UX Designing",
-    rating: 5,
-    review:
-      "Modern, elegant and high-performing design. Truly impressive experience.",
-  },
+  { name: "Sarah Mitchell", service: "Web Development", rating: 5, review: "RAWGENN delivered a stunning website that exceeded expectations. Extremely professional process." },
+  { name: "David Chen", service: "Logo Design", rating: 5, review: "Outstanding creative quality and very smooth communication. Highly recommended." },
+  { name: "Maria Santos", service: "UI/UX Designing", rating: 5, review: "Modern, elegant and high-performing design. Truly impressive experience." },
+  { name: "James Wilson", service: "Content Writing", rating: 5, review: "The copy was engaging, SEO-optimized, and captured our brand voice perfectly." },
+  { name: "Priya Sharma", service: "AI Automation", rating: 5, review: "They automated our entire workflow, saving us 20 hours a week. Phenomenal ROI." },
+  { name: "Michael Chang", service: "Video Editing", rating: 5, review: "Crisp edits, great pacing, and delivered ahead of schedule. Will definitely hire again." },
+  { name: "Emma Thompson", service: "Ghost Writing", rating: 5, review: "They turned my rough ideas into an absolute masterpiece of an article. Highly skilled." },
+  { name: "Ahmed Hassan", service: "Event Management", rating: 5, review: "Every single detail of our corporate event was flawless. RAWGENN took all the stress away." },
+  { name: "Olivia Martinez", service: "Graphic Design", rating: 5, review: "The visual assets they created for our ad campaign doubled our click-through rate." },
+  { name: "Lucas Silva", service: "Voice Over", rating: 5, review: "A clear, professional, and commanding voice that gave our presentation exactly what it needed." },
+  { name: "Sophia Lee", service: "Script Writing", rating: 5, review: "The script they wrote for our podcast was engaging, funny, and hit all the right beats." },
+  { name: "Daniel Kim", service: "Brochure Design", rating: 5, review: "Our new brochures look incredibly premium. The team really understood our luxury branding." }
 ];
+
+const floatingReviewsAnim = {
+  hidden: { y: 0, opacity: 0 },
+  visible: (custom: { delay: number; duration: number }) => ({
+    y: 900,
+    opacity: [0, 1, 1, 0],
+    transition: {
+      duration: custom.duration,
+      ease: "linear",
+      repeat: Infinity,
+      delay: custom.delay,
+      times: [0, 0.1, 0.9, 1],
+    },
+  }),
+};
 
 const Reviews = () => {
   const { toast } = useToast();
@@ -126,6 +132,13 @@ const Reviews = () => {
   };
 
   const allReviews = [...featuredReviews, ...dbReviews];
+  const displayReviews = allReviews.slice(0, 12); // Max 12 reviews as requested
+
+  // Split reviews into 3 columns for a clean masonry-style floating effect
+  const cols = [[], [], []] as Review[][];
+  displayReviews.forEach((r, i) => {
+    cols[i % 3].push(r);
+  });
 
   return (
     <div className="py-24">
@@ -137,50 +150,69 @@ const Reviews = () => {
           description="Trusted by professionals worldwide."
         />
 
-        {/* Reviews Auto-Scroll Marquee */}
-        <div className="mt-16 mx-auto max-w-4xl relative h-[600px] overflow-hidden rounded-3xl border border-glass-border bg-card/10 backdrop-blur-sm">
+        {/* Floating Reviews Animation */}
+        <div className="mt-16 mx-auto max-w-6xl relative h-[600px] overflow-hidden rounded-3xl border border-glass-border bg-card/10 backdrop-blur-sm">
           {/* Top and bottom gradient fades for smoothness */}
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background via-background/90 to-transparent z-10 pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/90 to-transparent z-10 pointer-events-none"></div>
 
-          <div className="animate-marquee-vertical flex flex-col gap-6 py-4 px-4 md:px-8">
-            {[...allReviews, ...allReviews, ...allReviews].map((r, i) => (
-              <div
-                key={`${r.name}-${i}`}
-                className="glass-card-hover p-6 md:p-8 w-full cursor-default"
-              >
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Star
-                      key={j}
-                      className={`h-5 w-5 ${j < r.rating
-                        ? "fill-accent text-accent"
-                        : "text-muted-foreground/30"
-                        }`}
-                    />
-                  ))}
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full px-4 md:px-8">
+            {cols.map((colReviews, colIndex) => {
+              // Slightly different speeds for an organic feel
+              const duration = [28, 32, 30][colIndex];
 
-                <p className="text-base md:text-lg italic text-foreground/90">
-                  "{r.review}"
-                </p>
+              return (
+                <div key={colIndex} className="relative h-full w-full hidden md:block first:block">
+                  {colReviews.map((r, i) => {
+                    // Stagger the start time perfectly so they never overlap
+                    const delay = -(i * (duration / colReviews.length));
 
-                <div className="mt-6 flex items-center gap-4">
-                  <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
-                    {r.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                      {r.name}
-                      <BadgeCheck className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="text-xs text-muted-foreground font-medium">
-                      {r.service}
-                    </div>
-                  </div>
+                    return (
+                      <motion.div
+                        key={`${r.name}-${i}`}
+                        custom={{ delay, duration }}
+                        variants={floatingReviewsAnim}
+                        initial="hidden"
+                        animate="visible"
+                        className="absolute w-full glass-card p-6 md:p-8 cursor-default shadow-md bg-background/80 hover:bg-background transition-colors border border-primary/5"
+                        style={{ top: "-30%" }}
+                      >
+                        <div className="flex gap-1 mb-4">
+                          {Array.from({ length: 5 }).map((_, j) => (
+                            <Star
+                              key={j}
+                              className={`h-4 w-4 ${j < r.rating
+                                  ? "fill-accent text-accent"
+                                  : "text-muted-foreground/30"
+                                }`}
+                            />
+                          ))}
+                        </div>
+
+                        <p className="text-sm md:text-base italic text-foreground/90 leading-relaxed">
+                          "{r.review}"
+                        </p>
+
+                        <div className="mt-6 flex items-center gap-3">
+                          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
+                            {r.name.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5 text-sm font-semibold">
+                              {r.name}
+                              <BadgeCheck className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="text-xs text-muted-foreground font-medium">
+                              {r.service}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

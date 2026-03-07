@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,6 +6,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import { Lock, Briefcase } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { services } from "@/data/services";
@@ -33,8 +34,44 @@ const formSchema = z.object({
   projectName: z.string().min(3, "Project name must be at least 3 characters."),
   serviceType: z.string().min(1, "Please select a service type."),
   description: z.string().min(10, "Please provide more details about the project."),
-  budget: z.coerce.number().min(10, "Please provide an estimated budget or at least 10").optional().or(z.literal("")),
+  currency: z.string().default("USD"),
+  urgency: z.string().default("Standard (Default)"),
+  budget: z.coerce.number().min(0, "Budget cannot be negative").optional().or(z.literal("")),
 });
+
+const SERVICE_BASE_PRICES: Record<string, number> = {
+  "UGC Videos": 300,
+  "Web Development": 1500,
+  "Content Writing": 150,
+  "Script Writing": 200,
+  "Video Editing": 250,
+  "Logo Design": 200,
+  "Ghost Writing": 400,
+  "Graphic Design": 150,
+  "Brochure Design": 250,
+  "Event Management": 1000,
+  "Cryptography": 2000,
+  "Comic Creation": 500,
+  "Filming": 800,
+  "Package & Label Design": 300,
+  "Voice Over": 150,
+  "UI/UX Designing": 800,
+  "AI Automation": 1200,
+  "Other": 500,
+};
+
+const CURRENCY_RATES: Record<string, { symbol: string, rate: number }> = {
+  "USD": { symbol: "$", rate: 1 },
+  "INR": { symbol: "₹", rate: 83 },
+  "EUR": { symbol: "€", rate: 0.92 },
+  "GBP": { symbol: "£", rate: 0.79 },
+};
+
+const URGENCY_MULTIPLIERS: Record<string, number> = {
+  "Standard (Default)": 1,
+  "Rush (1.5x)": 1.5,
+  "Urgent (2x)": 2,
+};
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -50,9 +87,31 @@ const PostProject = () => {
       projectName: "",
       serviceType: "",
       description: "",
+      currency: "USD",
+      urgency: "Standard (Default)",
       budget: "",
     },
   });
+
+  const watchServiceType = form.watch("serviceType");
+  const watchCurrency = form.watch("currency") || "USD";
+  const watchUrgency = form.watch("urgency") || "Standard (Default)";
+
+  const [estimatedCost, setEstimatedCost] = useState(0);
+
+  useEffect(() => {
+    if (watchServiceType) {
+      const basePrice = SERVICE_BASE_PRICES[watchServiceType] || 500;
+      const rate = CURRENCY_RATES[watchCurrency]?.rate || 1;
+      const multiplier = URGENCY_MULTIPLIERS[watchUrgency] || 1;
+      const calculated = Math.round(basePrice * rate * multiplier);
+      setEstimatedCost(calculated);
+
+      form.setValue("budget", calculated);
+    } else {
+      setEstimatedCost(0);
+    }
+  }, [watchServiceType, watchCurrency, watchUrgency, form]);
 
   const onSubmit = async (values: FormValues) => {
     if (!user) return;
@@ -61,18 +120,18 @@ const PostProject = () => {
     try {
       // First try to insert into the new `projects` table
       const { data, error } = await supabase
-  .from("projects")
-  .insert([
-    {
-      user_id: user.id,
-      project_name: values.projectName,
-      service_type: values.serviceType,
-      description: values.description,
-      budget: values.budget ? Number(values.budget) : null,
-      status: "Pending"
-    }
-  ])
-  .select();
+        .from("projects")
+        .insert([
+          {
+            user_id: user.id,
+            project_name: values.projectName,
+            service_type: values.serviceType,
+            description: `[Currency: ${values.currency}] [Timeline: ${values.urgency}]\n\n${values.description}`,
+            budget: values.budget ? Number(values.budget) : null,
+            status: "Pending"
+          }
+        ])
+        .select();
 
       if (error) {
         throw error;
@@ -148,7 +207,7 @@ const PostProject = () => {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              
+
               <FormField
                 control={form.control}
                 name="projectName"
@@ -191,12 +250,79 @@ const PostProject = () => {
 
                 <FormField
                   control={form.control}
+                  name="urgency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold text-gray-700">Project Timeline</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-gray-50 border-gray-200">
+                            <SelectValue placeholder="Select timeframe" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Standard (Default)">Standard Delivery</SelectItem>
+                          <SelectItem value="Rush (1.5x)">Rush Delivery (1.5x Cost)</SelectItem>
+                          <SelectItem value="Urgent (2x)">Urgent Delivery (2x Cost)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-primary/5 rounded-xl border border-primary/10">
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold text-gray-700">Currency</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-white">
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="USD">USD ($)</SelectItem>
+                          <SelectItem value="INR">INR (₹)</SelectItem>
+                          <SelectItem value="EUR">EUR (€)</SelectItem>
+                          <SelectItem value="GBP">GBP (£)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="budget"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-semibold text-gray-700">Estimated Budget ($) - Optional</FormLabel>
+                      <div className="flex justify-between items-center mb-2">
+                        <FormLabel className="font-semibold text-gray-700">Your Budget</FormLabel>
+                        <span className="text-primary font-bold text-lg">
+                          {CURRENCY_RATES[watchCurrency]?.symbol}{Number(field.value || 0).toLocaleString()}
+                        </span>
+                      </div>
                       <FormControl>
-                        <Input type="number" placeholder="e.g. 500" className="h-12 bg-gray-50 border-gray-200" {...field} />
+                        <div className="pt-2 pb-4">
+                          <Slider
+                            value={[Number(field.value || 0)]}
+                            min={0}
+                            max={100000}
+                            step={watchCurrency === "INR" ? 500 : 50}
+                            onValueChange={(vals) => field.onChange(vals[0])}
+                            disabled={!watchServiceType}
+                            className="my-4"
+                          />
+                          {!watchServiceType && (
+                            <p className="text-xs text-muted-foreground mt-2">Select a service to unlock the budget slider.</p>
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -232,7 +358,7 @@ const PostProject = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  * Note: Projects below ₹10,000 require 100% advance. Projects above require 50% advance.
+                  * Note: Projects below {CURRENCY_RATES[watchCurrency]?.symbol}{Math.round(10000 / CURRENCY_RATES["INR"].rate * (CURRENCY_RATES[watchCurrency]?.rate || 1)).toLocaleString()} require 100% advance. Projects above require 50% advance.
                 </p>
               </div>
 
